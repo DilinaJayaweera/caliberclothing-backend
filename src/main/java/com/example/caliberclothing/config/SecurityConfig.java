@@ -34,19 +34,6 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-//    @Bean
-//    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-//        http
-//                .csrf().disable()
-//                .authorizeHttpRequests(authz -> authz
-//                        .requestMatchers("/api/auth/**").permitAll()
-//                        .requestMatchers("/api/employees/**").hasRole("MANAGER")
-//                        .anyRequest().authenticated()
-//                );
-//
-//        return http.build();
-//    }
-
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
@@ -84,10 +71,15 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/api/auth/**", "/api/public/**").permitAll()
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/employee/**").hasAnyRole("ADMIN", "EMPLOYEE")
-                        .requestMatchers("/api/customer/**").hasAnyRole("ADMIN", "EMPLOYEE", "CUSTOMER")
+                        .requestMatchers("/api/auth/**", "/api/public/**", "/api/products/**", "/api/categories/**").permitAll()
+                        .requestMatchers("/api/ceo/**", "/api/reports/**").hasRole("CEO")
+                        .requestMatchers("/api/product-manager/**").hasRole("PRODUCT_MANAGER")
+                        .requestMatchers("/api/merchandise-manager/**", "/api/notifications/**").hasRole("MERCHANDISE_MANAGER")
+                        .requestMatchers("/api/dispatch-officer/**").hasRole("DISPATCH_OFFICER")
+                        .requestMatchers("/api/customer/**", "/api/cart/**", "/api/wishlist/**").hasRole("CUSTOMER")
+                        .requestMatchers("/api/employees/**").hasRole("CEO")
+                        .requestMatchers("/api/admin/**").hasRole("CEO")
+                        .requestMatchers("/api/employee/**").hasAnyRole("CEO", "PRODUCT_MANAGER", "MERCHANDISE_MANAGER", "DISPATCH_OFFICER")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
@@ -99,5 +91,4 @@ public class SecurityConfig {
 
         return http.build();
     }
-
 }

@@ -1,5 +1,6 @@
 package com.example.caliberclothing.controller;
 
+import com.example.caliberclothing.dto.ChangePasswordRequest;
 import com.example.caliberclothing.dto.LoginRequest;
 import com.example.caliberclothing.dto.LoginResponse;
 import com.example.caliberclothing.dto.RegisterRequest;
@@ -16,6 +17,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,7 +26,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
-//@CrossOrigin(origins = "*")
 public class AuthController {
 
     @Autowired
@@ -32,6 +33,9 @@ public class AuthController {
 
     @Autowired
     private UserService userServiceImpl;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
@@ -150,7 +154,9 @@ public class AuthController {
         return switch (role.toUpperCase()) {
             case "CEO" -> "/ceo/dashboard";
             case "PRODUCT_MANAGER" -> "/product_manager/dashboard";
-            case "CUSTOMER" -> "/customer/dashboard";
+            case "MERCHANDISE_MANAGER" -> "/merchandise_manager/dashboard";
+            case "DISPATCH_OFFICER" -> "/dispatch_officer/dashboard";
+            case "CUSTOMER" -> "/products";
             default -> "/dashboard";
         };
     }
@@ -168,6 +174,11 @@ public class AuthController {
             // Verify current password
             if (!passwordEncoder.matches(changePasswordRequest.getCurrentPassword(), userDetails.getPassword())) {
                 return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Current password is incorrect"));
+            }
+
+            // Verify new password and confirm password match
+            if (!changePasswordRequest.getNewPassword().equals(changePasswordRequest.getConfirmPassword())) {
+                return ResponseEntity.badRequest().body(Map.of("success", false, "message", "New password and confirm password do not match"));
             }
 
             // Update password

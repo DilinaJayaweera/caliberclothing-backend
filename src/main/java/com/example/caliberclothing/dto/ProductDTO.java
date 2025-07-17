@@ -15,6 +15,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
+@Builder
 @Getter
 @Setter
 @JsonInclude(JsonInclude.Include.NON_NULL)

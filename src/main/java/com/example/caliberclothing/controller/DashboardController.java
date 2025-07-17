@@ -13,53 +13,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
-//@CrossOrigin(origins = "*")
 public class DashboardController {
-
-    @GetMapping("/admin/dashboard")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> getAdminDashboard(Authentication authentication) {
-        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("message", "Welcome to Admin Dashboard");
-        response.put("username", userDetails.getUsername());
-        response.put("role", userDetails.getRole());
-        response.put("dashboardType", "admin");
-        response.put("permissions", new String[]{"user_management", "product_management", "order_management", "reports"});
-
-        return ResponseEntity.ok(response);
-    }
-
-    @GetMapping("/employee/dashboard")
-    @PreAuthorize("hasRole('EMPLOYEE') or hasRole('ADMIN')")
-    public ResponseEntity<?> getEmployeeDashboard(Authentication authentication) {
-        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("message", "Welcome to Employee Dashboard");
-        response.put("username", userDetails.getUsername());
-        response.put("role", userDetails.getRole());
-        response.put("dashboardType", "employee");
-        response.put("permissions", new String[]{"product_management", "order_processing", "inventory_management"});
-
-        return ResponseEntity.ok(response);
-    }
-
-    @GetMapping("/customer/dashboard")
-    @PreAuthorize("hasRole('CUSTOMER') or hasRole('EMPLOYEE') or hasRole('ADMIN')")
-    public ResponseEntity<?> getCustomerDashboard(Authentication authentication) {
-        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("message", "Welcome to Customer Dashboard");
-        response.put("username", userDetails.getUsername());
-        response.put("role", userDetails.getRole());
-        response.put("dashboardType", "customer");
-        response.put("permissions", new String[]{"view_products", "place_orders", "view_order_history"});
-
-        return ResponseEntity.ok(response);
-    }
 
     @GetMapping("/dashboard")
     public ResponseEntity<?> getDashboard(Authentication authentication) {
@@ -68,9 +22,11 @@ public class DashboardController {
             String role = userDetails.getRole().toUpperCase();
 
             String redirectUrl = switch (role) {
-                case "ADMIN" -> "/api/admin/dashboard";
-                case "EMPLOYEE" -> "/api/employee/dashboard";
-                case "CUSTOMER" -> "/api/customer/dashboard";
+                case "CEO" -> "/api/ceo/dashboard";
+                case "PRODUCT_MANAGER" -> "/api/product-manager/dashboard";
+                case "MERCHANDISE_MANAGER" -> "/api/merchandise-manager/dashboard";
+                case "DISPATCH_OFFICER" -> "/api/dispatch-officer/dashboard";
+                case "CUSTOMER" -> "/products"; // Redirect to products page for customers
                 default -> "/api/dashboard";
             };
 
