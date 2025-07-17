@@ -25,7 +25,7 @@ public class EmployeeController {
     private EmployeeService employeeService;
 
     @PostMapping
-    @PreAuthorize("hasRole('MANAGER')")
+    @PreAuthorize("hasRole('CEO')")
     public ResponseEntity<EmployeeDTO> createEmployee(
             @Valid @RequestBody EmployeeDTO employeeDTO, UserDTO userDTO, String role, StatusDTO statusDTO,
             @RequestAttribute("currentUserId") int managerId) {
@@ -35,7 +35,7 @@ public class EmployeeController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('MANAGER')")
+    @PreAuthorize("hasRole('CEO')")
     public ResponseEntity<EmployeeDTO> updateEmployee(
             @PathVariable int id,
             @Valid @RequestBody EmployeeDTO employeeDTO, String role, StatusDTO statusDTO,
@@ -46,7 +46,7 @@ public class EmployeeController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('MANAGER')")
+    @PreAuthorize("hasRole('CEO')")
     public ResponseEntity<Void> deleteEmployee(
             @PathVariable int id,
             @RequestAttribute("currentUserId") int managerId) {
@@ -56,21 +56,21 @@ public class EmployeeController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('MANAGER')")
+    @PreAuthorize("hasRole('CEO')")
     public ResponseEntity<EmployeeDTO> getEmployeeById(@PathVariable int id) {
         EmployeeDTO employee = employeeService.getEmployeeById(id);
         return ResponseEntity.ok(employee);
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('MANAGER')")
+    @PreAuthorize("hasRole('CEO')")
     public ResponseEntity<List<EmployeeDTO>> getAllEmployees() {
         List<EmployeeDTO> employees = employeeService.getAllEmployees();
         return ResponseEntity.ok(employees);
     }
 
     @GetMapping("/active")
-    @PreAuthorize("hasRole('MANAGER')")
+    @PreAuthorize("hasRole('CEO')")
     public ResponseEntity<List<EmployeeDTO>> getActiveEmployees() {
         List<EmployeeDTO> employees = employeeService.getActiveEmployees();
         return ResponseEntity.ok(employees);
@@ -84,14 +84,14 @@ public class EmployeeController {
 //    }
 
     @GetMapping("/search")
-    @PreAuthorize("hasRole('MANAGER')")
+    @PreAuthorize("hasRole('CEO')")
     public ResponseEntity<List<EmployeeDTO>> searchEmployees(@RequestParam String searchTerm) {
         List<EmployeeDTO> employees = employeeService.searchEmployees(searchTerm);
         return ResponseEntity.ok(employees);
     }
 
     @GetMapping("/roles")
-    @PreAuthorize("hasRole('MANAGER')")
+    @PreAuthorize("hasRole('CEO')")
     public ResponseEntity<List<String>> getAllRoles() {
         List<String> roles = employeeService.getAllRoles();
         return ResponseEntity.ok(roles);
