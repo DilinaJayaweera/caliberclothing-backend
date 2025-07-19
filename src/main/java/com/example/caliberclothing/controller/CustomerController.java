@@ -8,6 +8,7 @@ import com.example.caliberclothing.repository.CustomerRepository;
 import com.example.caliberclothing.repository.UserRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -31,6 +32,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/customer")
 @RequiredArgsConstructor
+@Slf4j
 public class CustomerController {
 
     @Autowired
@@ -56,6 +58,19 @@ public class CustomerController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @GetMapping("/current")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<CustomerDTO> getCurrentCustomer(Authentication authentication) {
+        try {
+            String username = authentication.getName();
+            CustomerDTO customer = customerService.getCustomerByUsername(username);
+            return ResponseEntity.ok(customer);
+        } catch (Exception e) {
+            log.error("Error fetching current customer: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
 
     // =========================== DASHBOARD & PROFILE ===========================
 
@@ -723,7 +738,7 @@ public class CustomerController {
             )));
             receipt.put("subtotal", order.getTotalPrice());
             receipt.put("total", order.getTotalPrice());
-            receipt.put("paymentInfo", order.getPayment());
+//            receipt.put("paymentInfo", order.getPayment());
             receipt.put("shippingAddress", order.getShippingAddress());
             receipt.put("status", order.getOrderStatus());
 

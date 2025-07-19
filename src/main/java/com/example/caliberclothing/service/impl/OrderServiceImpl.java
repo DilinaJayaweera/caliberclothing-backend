@@ -37,9 +37,9 @@ public class OrderServiceImpl implements OrderService {
             throw new IllegalArgumentException("Order number already exists");
         }
 
-        Employee employee = employeeRepository.findById(orderDTO.getEmployee().getId())
-                .orElseThrow(() -> new RuntimeException("Employee not found"));
-        String employeeNo = employee.getEmployeeNo();
+//        Employee employee = employeeRepository.findById(orderDTO.getEmployee().getId())
+//                .orElseThrow(() -> new RuntimeException("Employee not found"));
+//        String employeeNo = employee.getEmployeeNo();
 
         Order order = Order.builder()
                 .orderNo(orderDTO.getOrderNo())
@@ -49,11 +49,11 @@ public class OrderServiceImpl implements OrderService {
                 .shippingAddress(orderDTO.getShippingAddress())
                 .orderDate(orderDTO.getOrderDate())
                 .customer(Customer.builder().id(orderDTO.getCustomer().getId()).build())
-                .employee(employee)
+//                .employee(employee)
                 .orderStatus(OrderStatus.builder().id(orderDTO.getOrderStatus().getId()).build())
-                .payment(Payment.builder().id(orderDTO.getPayment().getId()).build())
-                .discount(orderDTO.getDiscount().getId() != null ?
-                        Discount.builder().id(orderDTO.getDiscount().getId()).build() : null)
+//                .payment(Payment.builder().id(orderDTO.getPayment().getId()).build())
+//                .discount(orderDTO.getDiscount().getId() != null ?
+//                        Discount.builder().id(orderDTO.getDiscount().getId()).build() : null)
                 .build();
 
         Order savedOrder = orderRepository.save(order);
@@ -83,20 +83,20 @@ public class OrderServiceImpl implements OrderService {
         if (orderDTO.getCustomer() != null && orderDTO.getCustomer().getId() != null) {
             order.setCustomer(Customer.builder().id(orderDTO.getCustomer().getId()).build());
         }
-        if (orderDTO.getEmployee() != null && orderDTO.getEmployee().getEmployeeNo() != null) {
-            Employee employee = employeeRepository.findByEmployeeNo(orderDTO.getEmployee().getEmployeeNo())
-                    .orElseThrow(() -> new EntityNotFoundException("Employee not found with employeeNo: " + orderDTO.getEmployee().getEmployeeNo()));
-            order.setEmployee(employee);
-        }
+//        if (orderDTO.getEmployee() != null && orderDTO.getEmployee().getEmployeeNo() != null) {
+//            Employee employee = employeeRepository.findByEmployeeNo(orderDTO.getEmployee().getEmployeeNo())
+//                    .orElseThrow(() -> new EntityNotFoundException("Employee not found with employeeNo: " + orderDTO.getEmployee().getEmployeeNo()));
+//            order.setEmployee(employee);
+//        }
         if (orderDTO.getOrderStatus() != null && orderDTO.getOrderStatus().getId() != null) {
             order.setOrderStatus(OrderStatus.builder().id(orderDTO.getOrderStatus().getId()).build());
         }
-        if (orderDTO.getPayment() != null && orderDTO.getPayment().getId() != null) {
-            order.setPayment(Payment.builder().id(orderDTO.getPayment().getId()).build());
-        }
-        if (orderDTO.getDiscount() != null && orderDTO.getDiscount().getId() != null) {
-            order.setDiscount(Discount.builder().id(orderDTO.getDiscount().getId()).build());
-        }
+//        if (orderDTO.getPayment() != null && orderDTO.getPayment().getId() != null) {
+//            order.setPayment(Payment.builder().id(orderDTO.getPayment().getId()).build());
+//        }
+//        if (orderDTO.getDiscount() != null && orderDTO.getDiscount().getId() != null) {
+//            order.setDiscount(Discount.builder().id(orderDTO.getDiscount().getId()).build());
+//        }
 
         Order updatedOrder = orderRepository.save(order);
         return convertToDTO(updatedOrder);
@@ -135,13 +135,13 @@ public class OrderServiceImpl implements OrderService {
                 .collect(Collectors.toList());
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<OrderDTO> getOrdersByEmployeeId(Integer employeeId) {
-        return orderRepository.findByEmployeeId(employeeId).stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
-    }
+//    @Override
+//    @Transactional(readOnly = true)
+//    public List<OrderDTO> getOrdersByEmployeeId(Integer employeeId) {
+//        return orderRepository.findByEmployeeId(employeeId).stream()
+//                .map(this::convertToDTO)
+//                .collect(Collectors.toList());
+//    }
 
     @Override
     @Transactional(readOnly = true)
@@ -192,14 +192,14 @@ public class OrderServiceImpl implements OrderService {
                 .orderDate(order.getOrderDate())
                 .customer(order.getCustomer() != null ?
                         CustomerDTO.builder().id(order.getCustomer().getId()).build() : null)
-                .employee(order.getEmployee() != null ?
-                        Employee.builder().id(order.getEmployee().getId()).employeeNo(order.getEmployee().getEmployeeNo()).build() : null)
+//                .employee(order.getEmployee() != null ?
+//                        Employee.builder().id(order.getEmployee().getId()).employeeNo(order.getEmployee().getEmployeeNo()).build() : null)
                 .orderStatus(order.getOrderStatus() != null ?
                         OrderStatusDTO.builder().id(order.getOrderStatus().getId()).build() : null)
-                .payment(order.getPayment() != null ?
-                        PaymentDTO.builder().id(order.getPayment().getId()).build() : null)
-                .discount(order.getDiscount() != null ?
-                        DiscountDTO.builder().id(order.getDiscount().getId()).build() : null)
+//                .payment(order.getPayment() != null ?
+//                        PaymentDTO.builder().id(order.getPayment().getId()).build() : null)
+//                .discount(order.getDiscount() != null ?
+//                        DiscountDTO.builder().id(order.getDiscount().getId()).build() : null)
                 .build();
     }
 

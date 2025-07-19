@@ -20,8 +20,15 @@ public class ProductServiceImpl implements ProductService {
     @Autowired
     private ProductRepository productRepository;
 
+    @Transactional(readOnly = true)
     public List<Product> getAllActiveProducts() {
-        return productRepository.findByIsActiveTrue();
+        List<Product> products = productRepository.findByIsActiveTrue();
+        // Force initialization of lazy properties
+        products.forEach(product -> {
+            product.getSupplierDetails().getSupplierName(); // Access to initialize
+            product.getProductCategory().getName(); // Access to initialize
+        });
+        return products;
     }
 
     public Optional<Product> getProductById(Integer id) {

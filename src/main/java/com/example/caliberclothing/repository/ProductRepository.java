@@ -27,4 +27,16 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
 
     @Query("SELECT p FROM Product p WHERE p.isActive = true ORDER BY p.createdTimestamp DESC")
     List<Product> findAllActiveOrderByCreatedDesc();
+
+    // Count active products in a specific category
+//    Long countByProductCategoryIdAndIsActiveTrue(Integer categoryId);
+//
+//    // Count all products in a specific category (both active and inactive)
+//    Long countByProductCategoryId(Integer categoryId);
+
+    @Query("SELECT COUNT(p) FROM Product p WHERE p.productCategory.id = :categoryId AND p.isActive = true")
+    Long countByProductCategoryIdAndIsActiveTrue(@Param("categoryId") Integer categoryId);
+
+    @Query("SELECT COUNT(p) FROM Product p WHERE p.productCategory.id = :categoryId")
+    Long countByProductCategoryId(@Param("categoryId") Integer categoryId);
 }

@@ -26,9 +26,9 @@ public class OrderDTO {
     private String shippingAddress;
     private LocalDateTime orderDate;
     private CustomerDTO customer;
-    private Employee employee;
+//    private Employee employee;
     private OrderStatusDTO orderStatus;
-    private PaymentDTO payment;
-    private DiscountDTO discount;
+//    private PaymentDTO payment;
+//    private DiscountDTO discount;
 
 }

@@ -3,6 +3,7 @@ package com.example.caliberclothing.service.impl;
 import com.example.caliberclothing.entity.SupplierDetails;
 import com.example.caliberclothing.repository.SupplierDetailsRepository;
 import com.example.caliberclothing.service.SupplierDetailsService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -44,10 +45,22 @@ public class SupplierDetailsServiceImpl implements SupplierDetailsService {
             return supplierRepository.save(supplier);
         }
 
-        public SupplierDetails updateSupplier(SupplierDetails supplier) {
-            supplier.setUpdatedTimestamp(LocalDateTime.now());
-            return supplierRepository.save(supplier);
-        }
+//        public SupplierDetails updateSupplier(SupplierDetails supplier) {
+//            supplier.setUpdatedTimestamp(LocalDateTime.now());
+//            return supplierRepository.save(supplier);
+//        }
+
+    public SupplierDetails updateSupplier(SupplierDetails supplier) {
+        // Get existing supplier to preserve createdTimestamp
+        SupplierDetails existingSupplier = supplierRepository.findById(supplier.getId())
+                .orElseThrow(() -> new EntityNotFoundException("Supplier not found"));
+
+        // Preserve original timestamps
+        supplier.setCreatedTimestamp(existingSupplier.getCreatedTimestamp());
+        supplier.setUpdatedTimestamp(LocalDateTime.now());
+
+        return supplierRepository.save(supplier);
+    }
 
         public void softDeleteSupplier(Integer id) {
             Optional<SupplierDetails> supplier = supplierRepository.findById(id);
@@ -58,6 +71,11 @@ public class SupplierDetailsServiceImpl implements SupplierDetailsService {
                 supplierRepository.save(s);
             }
         }
+
+    @Override
+    public void deleteSupplier(Integer id) {
+        supplierRepository.deleteById(id);
+    }
 
 
 }

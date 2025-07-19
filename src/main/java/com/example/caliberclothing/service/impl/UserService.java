@@ -22,11 +22,10 @@ public class UserService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<User> user = userRepository.findByUsernameAndIsActiveTrue(username);
-        if (user.isEmpty()) {
-            throw new UsernameNotFoundException("User not found or inactive: " + username);
-        }
-        return new CustomUserDetails(user.get());
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+
+        return new CustomUserDetails(user);
     }
 
     public Optional<User> findByUsername(String username) {
@@ -57,5 +56,10 @@ public class UserService implements UserDetailsService {
     public boolean existsByUsername(String username) {
         return userRepository.existsByUsername(username);
     }
+
+//    @Override
+//    public Optional<User> findByUsername(String username) {
+//        return userRepository.findByUsername(username);
+//    }
 }
 

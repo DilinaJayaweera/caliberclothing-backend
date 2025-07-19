@@ -177,4 +177,14 @@ public class MerchandiseManagerController {
         List<SupplierPaymentDTO> payments = supplierPaymentService.getSupplierPaymentsByDateRange(startDate, endDate);
         return ResponseEntity.ok(payments);
     }
+
+    @DeleteMapping("/suppliers/{id}")
+    public ResponseEntity<Void> deleteSupplier(@PathVariable Integer id) {
+        try {
+            supplierDetailsService.deleteSupplier(id); // or softDeleteSupplier(id) if you prefer soft delete
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
 }

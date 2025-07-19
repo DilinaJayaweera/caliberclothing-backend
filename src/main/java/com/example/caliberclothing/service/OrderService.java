@@ -22,7 +22,7 @@ public interface OrderService {
 
     List<OrderDTO> getOrdersByCustomerId(Integer customerId);
 
-    List<OrderDTO> getOrdersByEmployeeId(Integer employeeId);
+//    List<OrderDTO> getOrdersByEmployeeId(Integer employeeId);
 
     List<OrderDTO> getOrdersByStatusId(Integer statusId);
 

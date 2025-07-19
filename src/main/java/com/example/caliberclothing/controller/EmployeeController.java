@@ -34,16 +34,16 @@ public class EmployeeController {
         return new ResponseEntity<>(createdEmployee, HttpStatus.CREATED);
     }
 
-    @PutMapping("/{id}")
-    @PreAuthorize("hasRole('CEO')")
-    public ResponseEntity<EmployeeDTO> updateEmployee(
-            @PathVariable int id,
-            @Valid @RequestBody EmployeeDTO employeeDTO, String role, StatusDTO statusDTO,
-            @RequestAttribute("currentUserId") int managerId) {
-
-        EmployeeDTO updatedEmployee = employeeService.updateEmployee(id, employeeDTO, role, statusDTO, managerId);
-        return ResponseEntity.ok(updatedEmployee);
-    }
+//    @PutMapping("/{id}")
+//    @PreAuthorize("hasRole('CEO')")
+//    public ResponseEntity<EmployeeDTO> updateEmployee(
+//            @PathVariable int id,
+//            @Valid @RequestBody EmployeeDTO employeeDTO, String role, StatusDTO statusDTO,
+//            @RequestAttribute("currentUserId") int managerId) {
+//
+//        EmployeeDTO updatedEmployee = employeeService.updateEmployee(id, employeeDTO, role, statusDTO, managerId);
+//        return ResponseEntity.ok(updatedEmployee);
+//    }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('CEO')")

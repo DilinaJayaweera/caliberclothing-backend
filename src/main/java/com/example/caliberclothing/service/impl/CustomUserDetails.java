@@ -18,7 +18,9 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singleton(new SimpleGrantedAuthority("ROLE_" + user.getRole().toUpperCase()));
+        // THIS IS THE KEY METHOD - Spring Security expects "ROLE_" prefix
+        String role = "ROLE_" + user.getRole(); // e.g., "ROLE_CEO"
+        return Collections.singletonList(new SimpleGrantedAuthority(role));
     }
 
     @Override
@@ -51,12 +53,13 @@ public class CustomUserDetails implements UserDetails {
         return user.getIsActive();
     }
 
+    // Additional helper methods
     public User getUser() {
         return user;
     }
 
     public String getRole() {
-        return user.getRole();
+        return user.getRole(); // Returns just "CEO", not "ROLE_CEO"
     }
 }
 

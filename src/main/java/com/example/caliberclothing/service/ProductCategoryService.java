@@ -2,24 +2,49 @@ package com.example.caliberclothing.service;
 
 import com.example.caliberclothing.entity.ProductCategory;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 public interface ProductCategoryService {
 
-    public List<ProductCategory> getAllActiveCategories();
+    // Get all active categories
+    List<ProductCategory> getAllActiveCategories();
 
-    public Optional<ProductCategory> getCategoryById(Integer id);
+    // Get all categories (including inactive)
+    List<ProductCategory> getAllCategories();
 
-    public Optional<ProductCategory> getCategoryByCategoryNo(String categoryNo);
+    // Get category by ID
+    Optional<ProductCategory> getCategoryById(Integer id);
 
-    public List<ProductCategory> searchCategoriesByName(String name);
+    // Get category by category number
+    Optional<ProductCategory> getCategoryByCategoryNo(String categoryNo);
 
-    public ProductCategory saveCategory(ProductCategory category);
+    // Search categories by name
+//    List<ProductCategory> searchCategoriesByName(String name);
 
-    public ProductCategory updateCategory(ProductCategory category);
+    // Save new category
+    ProductCategory saveCategory(ProductCategory category);
 
-    public void softDeleteCategory(Integer id);
+    // Update existing category
+    ProductCategory updateCategory(ProductCategory category);
 
+    // Soft delete category
+    void softDeleteCategory(Integer id);
+
+    // Hard delete category (use with caution)
+    void deleteCategory(Integer id);
+
+    // Generate category number
+    String generateCategoryNo(String name);
+
+    // Validate category name uniqueness
+    boolean isCategoryNameUnique(String name);
+
+    // Validate category name uniqueness for updates
+    boolean isCategoryNameUniqueForUpdate(String name, Integer categoryId);
+
+    // Get categories with product count
+    List<ProductCategory> getCategoriesWithProductCount();
+
+//    public List<ProductCategory> searchCategoriesByName(String name);
 }

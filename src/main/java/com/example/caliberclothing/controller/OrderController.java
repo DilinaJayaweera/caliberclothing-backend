@@ -62,11 +62,11 @@ public class OrderController {
         return ResponseEntity.ok(orders);
     }
 
-    @GetMapping("/employee/{employeeId}")
-    public ResponseEntity<List<OrderDTO>> getOrdersByEmployeeId(@PathVariable Integer employeeId) {
-        List<OrderDTO> orders = orderService.getOrdersByEmployeeId(employeeId);
-        return ResponseEntity.ok(orders);
-    }
+//    @GetMapping("/employee/{employeeId}")
+//    public ResponseEntity<List<OrderDTO>> getOrdersByEmployeeId(@PathVariable Integer employeeId) {
+//        List<OrderDTO> orders = orderService.getOrdersByEmployeeId(employeeId);
+//        return ResponseEntity.ok(orders);
+//    }
 
     @GetMapping("/status/{statusId}")
     public ResponseEntity<List<OrderDTO>> getOrdersByStatusId(@PathVariable Integer statusId) {

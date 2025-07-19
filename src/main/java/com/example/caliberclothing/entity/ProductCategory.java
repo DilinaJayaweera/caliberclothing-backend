@@ -2,11 +2,7 @@ package com.example.caliberclothing.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -23,15 +19,16 @@ public class ProductCategory {
     private int id;
 
     @Column(name = "category_no", nullable = false)
-    @NotBlank(message = "Category no is required")
     private String categoryNo;
 
     @Column(nullable = false)
     @NotBlank(message = "Name is required")
     private String name;
 
+//    @Column(name = "description")
+//    private String description;
+
     @Column(name = "created_timestamp", nullable = false)
-    @NotNull
     private LocalDateTime createdTimestamp;
 
     @Column(name = "updated_timestamp")
@@ -42,5 +39,9 @@ public class ProductCategory {
 
     @Column(name = "is_active", nullable = false)
     private Boolean isActive;
+
+    // Transient field to hold product count (not persisted to database)
+    @Transient
+    private Long productCount;
 
 }

@@ -24,4 +24,6 @@ public interface SupplierDetailsService {
 
     public void softDeleteSupplier(Integer id);
 
+    void deleteSupplier(Integer id);
+
 }

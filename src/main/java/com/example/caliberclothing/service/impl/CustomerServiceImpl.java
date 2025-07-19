@@ -1,6 +1,8 @@
 package com.example.caliberclothing.service.impl;
 
 import com.example.caliberclothing.dto.CustomerDTO;
+import com.example.caliberclothing.dto.ProvinceDTO;
+import com.example.caliberclothing.dto.StatusDTO;
 import com.example.caliberclothing.dto.UserDTO;
 import com.example.caliberclothing.entity.Customer;
 import com.example.caliberclothing.entity.Province;
@@ -21,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -79,6 +82,7 @@ public class CustomerServiceImpl implements CustomerService {
                 .mobileNumber(customerDTO.getMobileNumber())
                 .nicNo(customerDTO.getNicNo())
                 .status(status)
+                .province(province)
                 .user(user)
                 .build();
 
@@ -172,6 +176,33 @@ public class CustomerServiceImpl implements CustomerService {
 
         return convertToDTO(customer);
     }
+
+//    public CustomerDTO getCustomerByUsername(String username) {
+//        Customer customer = customerRepository.findByUser_Username(username)
+//                .orElseThrow(() -> new RuntimeException("Customer not found"));
+//
+//        // Convert to DTO without sensitive information
+//        CustomerDTO customerDTO = new CustomerDTO();
+//        customerDTO.setId(customer.getId());
+//        customerDTO.setFullName(customer.getFullName());
+//        customerDTO.setFirstName(customer.getFirstName());
+//        customerDTO.setLastName(customer.getLastName());
+//        customerDTO.setEmail(customer.getEmail());
+//        customerDTO.setMobileNumber(customer.getMobileNumber());
+//        customerDTO.setAddress(customer.getAddress());
+//        customerDTO.setCountry(customer.getCountry());
+//        customerDTO.setProvince(customer.getProvince());
+//        customerDTO.setZipCode(customer.getZipCode());
+//        customerDTO.setDateOfBirth(customer.getDateOfBirth());
+//        customerDTO.setSex(customer.getSex());
+//        customerDTO.setNicNo(customer.getNicNo());
+//        customerDTO.setStatus(customer.getStatus());
+//        customerDTO.setCreatedTimestamp(customer.getCreatedTimestamp());
+//        customerDTO.setUpdatedTimestamp(customer.getUpdatedTimestamp());
+//        // Don't include user credentials
+//
+//        return customerDTO;
+//    }
 
     @Override
     @Transactional(readOnly = true)
@@ -279,6 +310,46 @@ public class CustomerServiceImpl implements CustomerService {
                 .map(this::convertToDTO);
     }
 
+//    private CustomerDTO convertToDTO(Customer customer) {
+//        return CustomerDTO.builder()
+//                .id(customer.getId())
+//                .fullName(customer.getFullName())
+//                .firstName(customer.getFirstName())
+//                .lastName(customer.getLastName())
+//                .dateOfBirth(customer.getDateOfBirth())
+//                .sex(customer.getSex())
+//                .email(customer.getEmail())
+//                .address(customer.getAddress())
+//                .country(customer.getCountry())
+//                .zipCode(customer.getZipCode())
+//                .mobileNumber(customer.getMobileNumber())
+//                .nicNo(customer.getNicNo())
+//                .createdTimestamp(customer.getCreatedTimestamp())
+//                .updatedTimestamp(customer.getUpdatedTimestamp())
+////                .status(customer.getStatus().getValue())
+////                .username(customer.getUser().getUsername())
+//                .build();
+//    }
+
+//@Override
+//public Integer getCustomerIdByUsername(String username) {
+//    Optional<Customer> customer = customerRepository.findByUsername(username);
+//    return customer.map(Customer::getId).orElse(null);
+//}
+
+    @Override
+    public Optional<Customer> findByUserId(Integer userId) {
+        return customerRepository.findByUserId(userId);
+    }
+
+public CustomerDTO getCustomerByUsername(String username) {
+    Customer customer = customerRepository.findByUserUsernameAndDeletedTimestampIsNull(username)
+            .orElseThrow(() -> new RuntimeException("Customer not found for username: " + username));
+
+    return convertToDTO(customer); // Use your existing DTO conversion method
+}
+
+    // Make sure you have a DTO conversion method like this:
     private CustomerDTO convertToDTO(Customer customer) {
         return CustomerDTO.builder()
                 .id(customer.getId())
@@ -293,10 +364,19 @@ public class CustomerServiceImpl implements CustomerService {
                 .zipCode(customer.getZipCode())
                 .mobileNumber(customer.getMobileNumber())
                 .nicNo(customer.getNicNo())
+//                .isActive(customer.getIsActive())
                 .createdTimestamp(customer.getCreatedTimestamp())
                 .updatedTimestamp(customer.getUpdatedTimestamp())
-//                .status(customer.getStatus().getValue())
-//                .username(customer.getUser().getUsername())
+                .deletedTimestamp(customer.getDeletedTimestamp())
+                .status(customer.getStatus() != null ? StatusDTO.builder()
+                        .id(customer.getStatus().getId())
+                        .value(customer.getStatus().getValue())
+                        .build() : null)
+                .province(customer.getProvince() != null ? ProvinceDTO.builder()
+                        .id(customer.getProvince().getId())
+                        .value(customer.getProvince().getValue())
+                        .build() : null)
+                // Don't include user credentials for security
                 .build();
     }
 }

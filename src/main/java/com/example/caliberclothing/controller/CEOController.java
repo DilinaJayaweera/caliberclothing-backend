@@ -1,8 +1,6 @@
 package com.example.caliberclothing.controller;
 
-import com.example.caliberclothing.dto.EmployeeDTO;
-import com.example.caliberclothing.dto.StatusDTO;
-import com.example.caliberclothing.dto.UserDTO;
+import com.example.caliberclothing.dto.*;
 import com.example.caliberclothing.entity.DeliveryServiceProvider;
 import com.example.caliberclothing.entity.Product;
 import com.example.caliberclothing.entity.SupplierDetails;
@@ -15,6 +13,8 @@ import com.example.caliberclothing.service.SupplierDetailsService;
 import com.example.caliberclothing.service.SupplierPaymentService;
 import com.example.caliberclothing.service.impl.CustomUserDetails;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/ceo")
@@ -72,36 +73,56 @@ public class CEOController {
     // Employee Management
     @PostMapping("/employees")
     public ResponseEntity<EmployeeDTO> createEmployee(
-            @Valid @RequestBody Map<String, Object> employeeData,
+            @Valid @RequestBody CreateEmployeeRequest request,
             Authentication authentication) {
 
-        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-        int ceoId = userDetails.getUser().getId();
+        try {
+            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+            int ceoId = userDetails.getUser().getId();
 
-        // Extract data from request
-        EmployeeDTO employeeDTO = extractEmployeeDTO(employeeData);
-        UserDTO userDTO = extractUserDTO(employeeData);
-        String role = (String) employeeData.get("role");
-        StatusDTO statusDTO = extractStatusDTO(employeeData);
+            // Convert request to DTOs
+            EmployeeDTO employeeDTO = EmployeeDTO.builder()
+                    .employeeNo(request.getEmployeeNo())
+                    .fullName(request.getFullName())
+                    .firstName(request.getFirstName())
+                    .lastName(request.getLastName())
+                    .dateOfBirth(request.getDateOfBirth())
+                    .sex(request.getSex())
+                    .civilStatus(request.getCivilStatus())
+                    .address(request.getAddress())
+                    .mobileNumber(request.getMobileNumber())
+                    .telephoneNumber(request.getTelephoneNumber())
+                    .nicNo(request.getNicNo())
+                    .build();
 
-        EmployeeDTO createdEmployee = employeeService.createEmployee(employeeDTO, userDTO, role, statusDTO, ceoId);
-        return ResponseEntity.ok(createdEmployee);
+            UserDTO userDTO = UserDTO.builder()
+                    .username(request.getUsername())
+                    .password(request.getPassword())
+                    .isActive(true)
+                    .build();
+
+            StatusDTO statusDTO = StatusDTO.builder()
+                    .id(request.getStatusId())
+                    .build();
+
+            EmployeeDTO createdEmployee = employeeService.createEmployee(employeeDTO, userDTO, request.getRole(), statusDTO, ceoId);
+            return ResponseEntity.ok(createdEmployee);
+
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @PutMapping("/employees/{id}")
     public ResponseEntity<EmployeeDTO> updateEmployee(
             @PathVariable int id,
-            @Valid @RequestBody Map<String, Object> employeeData,
+            @Valid @RequestBody EmployeeUpdateRequest employeeData,
             Authentication authentication) {
 
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         int ceoId = userDetails.getUser().getId();
 
-        EmployeeDTO employeeDTO = extractEmployeeDTO(employeeData);
-        String role = (String) employeeData.get("role");
-        StatusDTO statusDTO = extractStatusDTO(employeeData);
-
-        EmployeeDTO updatedEmployee = employeeService.updateEmployee(id, employeeDTO, role, statusDTO, ceoId);
+        EmployeeDTO updatedEmployee = employeeService.updateEmployee(id, employeeData, ceoId);
         return ResponseEntity.ok(updatedEmployee);
     }
 
@@ -117,9 +138,25 @@ public class CEOController {
         return ResponseEntity.noContent().build();
     }
 
+    private static final Logger logger = LoggerFactory.getLogger(CEOController.class);
+
     @GetMapping("/employees")
-    public ResponseEntity<List<EmployeeDTO>> getAllEmployees() {
+    public ResponseEntity<List<EmployeeDTO>> getAllEmployees(Authentication authentication) {
+        logger.info("=== CEO EMPLOYEES ENDPOINT CALLED ===");
+        logger.info("Authentication object: {}", authentication);
+        logger.info("Principal: {}", authentication.getPrincipal());
+        logger.info("Authorities: {}", authentication.getAuthorities());
+
+        if (authentication.getPrincipal() instanceof CustomUserDetails) {
+            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+            logger.info("User ID: {}", userDetails.getUser().getId());
+            logger.info("Username: {}", userDetails.getUsername());
+            logger.info("Role: {}", userDetails.getRole());
+            logger.info("Is Active: {}", userDetails.getUser().getIsActive());
+        }
+
         List<EmployeeDTO> employees = employeeService.getAllEmployees();
+        logger.info("Found {} employees", employees.size());
         return ResponseEntity.ok(employees);
     }
 
@@ -144,9 +181,16 @@ public class CEOController {
 
     @PutMapping("/products/{id}")
     public ResponseEntity<Product> updateProduct(@PathVariable Integer id, @Valid @RequestBody Product product) {
-        product.setId(id);
-        Product updatedProduct = productService.updateProduct(product);
-        return ResponseEntity.ok(updatedProduct);
+        Optional<Product> existingProduct = productService.getProductById(id);
+        if (existingProduct.isPresent()) {
+            product.setId(id);
+            // Preserve the original createdTimestamp from existing product
+            product.setCreatedTimestamp(existingProduct.get().getCreatedTimestamp());
+
+            Product updatedProduct = productService.updateProduct(product);
+            return ResponseEntity.ok(updatedProduct);
+        }
+        return ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/products/{id}")

@@ -66,4 +66,9 @@ public interface CustomerRepository extends JpaRepository<Customer, Integer> {
             "LOWER(c.email) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
             "c.nicNo LIKE CONCAT('%', :searchTerm, '%'))")
     List<Customer> searchActiveCustomers(@Param("searchTerm") String searchTerm);
+
+    @Query("SELECT c FROM Customer c WHERE c.deletedTimestamp IS NULL AND c.user.username = :username")
+    Optional<Customer> findByUserUsernameAndDeletedTimestampIsNull(@Param("username") String username);
+
+    Optional<Customer> findByUserId(Integer userId);
 }

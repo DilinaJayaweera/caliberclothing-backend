@@ -1,5 +1,6 @@
 package com.example.caliberclothing.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -16,6 +17,7 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class SupplierDetails {
 
     @Id
@@ -43,11 +45,11 @@ public class SupplierDetails {
     private String contactNo;
 
     @Column(name = "created_timestamp", nullable = false)
-    @NotNull(message = "Created timestamp is required")
+//    @NotNull(message = "Created timestamp is required")
     private LocalDateTime createdTimestamp;
 
-    @Column(name = "updated_timestamp", nullable = false)
-    @NotNull(message = "Updated timestamp is required")
+    @Column(name = "updated_timestamp")
+//    @NotNull(message = "Updated timestamp is required")
     private LocalDateTime updatedTimestamp;
 
     @Column(name = "deleted_timestamp")

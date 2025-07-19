@@ -1,5 +1,6 @@
 package com.example.caliberclothing.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.Min;
@@ -19,6 +20,7 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Product {
 
     @Id
@@ -58,7 +60,6 @@ public class Product {
     private BigDecimal profitPercentage;
 
     @Column(name = "created_timestamp", nullable = false)
-    @NotNull
     private LocalDateTime createdTimestamp;
 
     @Column(name = "updated_timestamp")
@@ -72,10 +73,12 @@ public class Product {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "supplier_details_id", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private SupplierDetails supplierDetails;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_category_id", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private ProductCategory productCategory;
 
 }

@@ -52,20 +52,20 @@ public class Order {
     @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "employee_id", nullable = false)
-    private Employee employee;
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "employee_id", nullable = false)
+//    private Employee employee;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_status_id", nullable = false)
     private OrderStatus orderStatus;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "payment_id", nullable = false, unique = true)
-    private Payment payment;
+//    @OneToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "payment_id", nullable = false, unique = true)
+//    private Payment payment;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "discount_id")
-    private Discount discount;
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "discount_id")
+//    private Discount discount;
 
 }

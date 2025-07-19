@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -20,7 +21,6 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
-import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -91,50 +91,32 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                // Enable CORS with our configuration
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-
-                // Disable CSRF for API endpoints (since we're using session/token auth)
                 .csrf(csrf -> csrf.disable())
 
-                // Configure authorization rules
+                // Enable Basic Auth
+                .httpBasic(Customizer.withDefaults())
+
                 .authorizeHttpRequests(authz -> authz
-                        // Public endpoints - no authentication required
                         .requestMatchers("/api/auth/**", "/api/public/**", "/api/products/**",
-                                "/api/categories/**", "/api/health/**").permitAll()
-
-                        // CEO endpoints
-                        .requestMatchers("/api/ceo/**", "/api/reports/**").hasRole("CEO")
-
-                        // Product Manager endpoints
+                                "/api/categories/**", "/api/health/**", "/api/statuses/**",
+                                "/api/provinces/**", "/api/debug/**", "/uploads/**",
+                                "/api/customer/register").permitAll()
+                        .requestMatchers("/api/ceo/**", "/api/reports/**", "/api/upload/**").hasRole("CEO")
                         .requestMatchers("/api/product-manager/**").hasRole("PRODUCT_MANAGER")
-
-                        // Merchandise Manager endpoints
                         .requestMatchers("/api/merchandise-manager/**", "/api/notifications/**").hasRole("MERCHANDISE_MANAGER")
-
-                        // Dispatch Officer endpoints
                         .requestMatchers("/api/dispatch-officer/**").hasRole("DISPATCH_OFFICER")
-
-                        // Customer endpoints
                         .requestMatchers("/api/customer/**", "/api/cart/**", "/api/wishlist/**").hasRole("CUSTOMER")
-
-                        // Employee management endpoints
                         .requestMatchers("/api/employees/**").hasRole("CEO")
                         .requestMatchers("/api/admin/**").hasRole("CEO")
                         .requestMatchers("/api/employee/**").hasAnyRole("CEO", "PRODUCT_MANAGER", "MERCHANDISE_MANAGER", "DISPATCH_OFFICER")
-
-                        // All other requests require authentication
                         .anyRequest().authenticated()
                 )
-
-                // Configure session management
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                         .maximumSessions(1)
                         .maxSessionsPreventsLogin(false)
                 )
-
-                // Set the authentication provider
                 .authenticationProvider(authenticationProvider());
 
         return http.build();

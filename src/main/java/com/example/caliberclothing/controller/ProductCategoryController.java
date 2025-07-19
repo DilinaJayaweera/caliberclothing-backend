@@ -38,11 +38,11 @@ public class ProductCategoryController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/search")
-    public ResponseEntity<List<ProductCategory>> searchCategories(@RequestParam String name) {
-        List<ProductCategory> categories = categoryService.searchCategoriesByName(name);
-        return ResponseEntity.ok(categories);
-    }
+//    @GetMapping("/search")
+//    public ResponseEntity<List<ProductCategory>> searchCategories(@RequestParam String name) {
+//        List<ProductCategory> categories = categoryService.searchCategoriesByName(name);
+//        return ResponseEntity.ok(categories);
+//    }
 
     @PostMapping
     public ResponseEntity<ProductCategory> createCategory(@Valid @RequestBody ProductCategory category) {

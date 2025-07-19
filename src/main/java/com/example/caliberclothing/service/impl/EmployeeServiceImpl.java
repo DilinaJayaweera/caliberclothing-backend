@@ -1,6 +1,7 @@
 package com.example.caliberclothing.service.impl;
 
 import com.example.caliberclothing.dto.EmployeeDTO;
+import com.example.caliberclothing.dto.EmployeeUpdateRequest;
 import com.example.caliberclothing.dto.StatusDTO;
 import com.example.caliberclothing.dto.UserDTO;
 import com.example.caliberclothing.entity.Employee;
@@ -45,71 +46,68 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public EmployeeDTO createEmployee(EmployeeDTO employeeDTO, UserDTO userDTO, String role, StatusDTO statusDTO, int managerId) {
-        // Validate unique fields
-        if (employeeRepository.findByEmployeeNoAndDeletedTimestampIsNull(employeeDTO.getEmployeeNo()).isPresent()) {
-            throw new RuntimeException("Employee number already exists");
+        try {
+            // Validate unique fields
+            if (employeeRepository.findByEmployeeNoAndDeletedTimestampIsNull(employeeDTO.getEmployeeNo()).isPresent()) {
+                throw new RuntimeException("Employee number already exists");
+            }
+
+            if (employeeRepository.findByNicNoAndDeletedTimestampIsNull(employeeDTO.getNicNo()).isPresent()) {
+                throw new RuntimeException("NIC number already exists");
+            }
+
+            if (userRepository.existsByUsername(userDTO.getUsername())) {
+                throw new RuntimeException("Username already exists");
+            }
+
+            // Get status
+            Status status = statusRepository.findById(statusDTO.getId())
+                    .orElseThrow(() -> new RuntimeException("Status not found"));
+
+            // Create user first
+            User user = User.builder()
+                    .username(userDTO.getUsername())
+                    .password(passwordEncoder.encode(userDTO.getPassword()))
+                    .isActive(true)
+                    .role(role) // Use the role string directly
+                    .build();
+
+            user = userRepository.save(user);
+
+            // Create employee
+            Employee employee = Employee.builder()
+                    .employeeNo(employeeDTO.getEmployeeNo())
+                    .fullName(employeeDTO.getFullName())
+                    .firstName(employeeDTO.getFirstName())
+                    .lastName(employeeDTO.getLastName())
+                    .dateOfBirth(employeeDTO.getDateOfBirth())
+                    .sex(employeeDTO.getSex())
+                    .civilStatus(employeeDTO.getCivilStatus())
+                    .address(employeeDTO.getAddress())
+                    .mobileNumber(employeeDTO.getMobileNumber())
+                    .telephoneNumber(employeeDTO.getTelephoneNumber())
+                    .nicNo(employeeDTO.getNicNo())
+                    .isActive(true)
+                    .createdTimestamp(LocalDateTime.now()) // Add this
+                    .updatedTimestamp(LocalDateTime.now()) // Add this
+                    .createdUser(managerId)
+                    .user(user) // Only once!
+                    .status(status)
+                    .build();
+
+            employee = employeeRepository.save(employee);
+            return convertToDTO(employee);
+
+        } catch (Exception e) {
+            // Log the error for debugging
+            System.err.println("Error creating employee: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Failed to create employee: " + e.getMessage());
         }
-
-        if (employeeRepository.findByNicNoAndDeletedTimestampIsNull(employeeDTO.getNicNo()).isPresent()) {
-            throw new RuntimeException("NIC number already exists");
-        }
-
-        if (userRepository.existsByUsername(userDTO.getUsername())) {
-            throw new RuntimeException("Username already exists");
-        }
-
-//        if (employeeRepository.existsByEmail(employeeDTO.getEmail())) {
-//            throw new RuntimeException("Email already exists");
-//        }
-
-        // Get role and status
-//        Role role = roleRepository.findById(roleDTO.getId()).orElse(null);
-//        if (role == null) {
-//            throw new RuntimeException("Role not found");
-//        }
-
-        Status status = statusRepository.findById(statusDTO.getId()).orElse(null);
-        if (status == null) {
-            throw new RuntimeException("Status not found");
-        }
-
-        // Create user
-        User user = User.builder()
-                .username(userDTO.getUsername())
-                .password(passwordEncoder.encode(userDTO.getPassword()))
-                .isActive(true)
-                .role(role)
-                .build();
-
-        user = userRepository.save(user);
-
-        // Create employee
-        Employee employee = Employee.builder()
-                .employeeNo(employeeDTO.getEmployeeNo())
-                .fullName(employeeDTO.getFullName())
-                .firstName(employeeDTO.getFirstName())
-                .lastName(employeeDTO.getLastName())
-                .dateOfBirth(employeeDTO.getDateOfBirth())
-                .sex(employeeDTO.getSex())
-                .civilStatus(employeeDTO.getCivilStatus())
-                .address(employeeDTO.getAddress())
-                .mobileNumber(employeeDTO.getMobileNumber())
-                .telephoneNumber(employeeDTO.getTelephoneNumber())
-                .nicNo(employeeDTO.getNicNo())
-                .isActive(true)
-                .createdUser(managerId)
-//                .role(role)
-                .user(user)
-                .status(status)
-                .user(user)
-                .build();
-
-        employee = employeeRepository.save(employee);
-        return convertToDTO(employee);
     }
 
     @Override
-    public EmployeeDTO updateEmployee(int employeeId, EmployeeDTO employeeDTO, String role, StatusDTO statusDTO, int managerId) {
+    public EmployeeDTO updateEmployee(int employeeId, EmployeeUpdateRequest employeeData, int managerId) {
         Employee employee = employeeRepository.findById(employeeId)
                 .orElseThrow(() -> new RuntimeException("Employee not found"));
 
@@ -118,44 +116,93 @@ public class EmployeeServiceImpl implements EmployeeService {
         }
 
         // Check for unique NIC if changed
-        if (!employee.getNicNo().equals(employeeDTO.getNicNo())) {
-            if (employeeRepository.findByNicNoAndDeletedTimestampIsNull(employeeDTO.getNicNo()).isPresent()) {
+        if (!employee.getNicNo().equals(employeeData.getNicNo())) {
+            if (employeeRepository.findByNicNoAndDeletedTimestampIsNull(employeeData.getNicNo()).isPresent()) {
                 throw new RuntimeException("NIC number already exists");
             }
         }
 
-        // Get status (Role no longer an entity here, so no need to fetch from repo)
-        Status status = statusRepository.findById(statusDTO.getId())
+        // Check for unique username if changed
+        if (employeeData.getUsername() != null && !employeeData.getUsername().trim().isEmpty()) {
+            User existingUser = employee.getUser();
+            if (existingUser != null && !existingUser.getUsername().equals(employeeData.getUsername())) {
+                if (userRepository.findByUsername(employeeData.getUsername()).isPresent()) {
+                    throw new RuntimeException("Username already exists");
+                }
+            }
+        }
+
+        // Get status
+        Status status = statusRepository.findById(employeeData.getStatusId())
                 .orElseThrow(() -> new RuntimeException("Status not found"));
 
         // Update employee fields
-        employee.setFullName(employeeDTO.getFullName());
-        employee.setFirstName(employeeDTO.getFirstName());
-        employee.setLastName(employeeDTO.getLastName());
-        employee.setDateOfBirth(employeeDTO.getDateOfBirth());
-        employee.setSex(employeeDTO.getSex());
-        employee.setCivilStatus(employeeDTO.getCivilStatus());
-        employee.setAddress(employeeDTO.getAddress());
-        employee.setMobileNumber(employeeDTO.getMobileNumber());
-        employee.setTelephoneNumber(employeeDTO.getTelephoneNumber());
-        employee.setNicNo(employeeDTO.getNicNo());
-        employee.setIsActive(employeeDTO.getIsActive());
+        employee.setEmployeeNo(employeeData.getEmployeeNo());
+        employee.setFullName(employeeData.getFullName());
+        employee.setFirstName(employeeData.getFirstName());
+        employee.setLastName(employeeData.getLastName());
+        employee.setDateOfBirth(employeeData.getDateOfBirth());
+        employee.setSex(employeeData.getSex());
+        employee.setCivilStatus(employeeData.getCivilStatus());
+        employee.setAddress(employeeData.getAddress());
+        employee.setMobileNumber(employeeData.getMobileNumber());
+        employee.setTelephoneNumber(employeeData.getTelephoneNumber());
+        employee.setNicNo(employeeData.getNicNo());
         employee.setUpdatedUser(managerId);
+        employee.setUpdatedTimestamp(LocalDateTime.now());
         employee.setStatus(status);
 
-        // Update role in User entity
+        // Set isActive based on status - this is the key fix!
+        boolean isActive = determineIsActiveFromStatus(status);
+        employee.setIsActive(isActive);
+
+        // Update user fields if provided
         User user = employee.getUser();
         if (user == null) {
             throw new RuntimeException("User not found for employee");
         }
-        user.setRole(role);  // role is String now
 
-        // Save user and employee (assuming cascading not enabled on user)
+        user.setRole(employeeData.getRole());
+
+        // Update username if provided
+        if (employeeData.getUsername() != null && !employeeData.getUsername().trim().isEmpty()) {
+            user.setUsername(employeeData.getUsername());
+        }
+
+        // Update password if provided
+        if (employeeData.getPassword() != null && !employeeData.getPassword().trim().isEmpty()) {
+            // You might want to encode the password here if using password encoding
+            // user.setPassword(passwordEncoder.encode(employeeData.getPassword()));
+            user.setPassword(employeeData.getPassword());
+        }
+
+        // Save user and employee
         userRepository.save(user);
         employee = employeeRepository.save(employee);
 
         return convertToDTO(employee);
     }
+
+    // Helper method to determine isActive based on status
+    private boolean determineIsActiveFromStatus(Status status) {
+        return status.getId() == 1;
+    }
+
+    @Override
+    public boolean isEmployeeActive(int employeeId) {
+        Employee employee = employeeRepository.findById(employeeId)
+                .orElseThrow(() -> new RuntimeException("Employee not found"));
+        return employee.getIsActive() && employee.getDeletedTimestamp() == null;
+    }
+
+//    @Override
+//    public List<EmployeeDTO> getActiveEmployees() {
+//        List<Employee> employees = employeeRepository.findByIsActiveTrueAndDeletedTimestampIsNull();
+//        return employees.stream()
+//                .map(this::convertToDTO)
+//                .collect(Collectors.toList());
+//    }
+
 
 
     @Override
@@ -286,10 +333,17 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .isActive(employee.getIsActive())
                 .createdTimestamp(employee.getCreatedTimestamp())
                 .updatedTimestamp(employee.getUpdatedTimestamp())
-//                .role(employee.getRole().getRoleName())
-//                .status(employee.getStatus().getStatusName())
-//                .username(employee.getUser().getUsername())
-//                .email(employee.getUser().getEmail())
+                // ADD THESE LINES:
+                .user(employee.getUser() != null ? UserDTO.builder()
+                        .id(employee.getUser().getId())
+                        .username(employee.getUser().getUsername())
+                        .role(employee.getUser().getRole())
+                        .isActive(employee.getUser().getIsActive())
+                        .build() : null)
+                .status(employee.getStatus() != null ? StatusDTO.builder()
+                        .id(employee.getStatus().getId())
+                        .value(employee.getStatus().getValue())
+                        .build() : null)
                 .build();
     }
 }

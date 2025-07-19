@@ -18,4 +18,5 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     @Query("SELECT DISTINCT u.role FROM User u WHERE u.role IS NOT NULL")
     List<String> findAllDistinctRoles();
 
+
 }
